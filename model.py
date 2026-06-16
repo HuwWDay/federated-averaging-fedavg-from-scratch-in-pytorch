@@ -405,8 +405,73 @@ def select_round_clients(num_clients, client_fraction, seed):
 
     return selected_clients
 
-# Step 18 - run_communication_round (not yet solved)
-# TODO: implement
+# Step 18 - run_communication_round
+import torch
+
+
+def run_communication_round(
+    global_state,
+    client_partitions,
+    selected_clients,
+    model_config,
+    local_epochs,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: train each selected client from the global state, then weighted-average their states
+
+    # If no clients are selected, the global state remains unchanged
+    if not selected_clients:
+        return global_state
+
+    round_client_states = []
+    round_client_counts = []
+
+    # Unpack model configuration parameters
+    input_size = model_config["input_size"]
+    hidden_size = model_config["hidden_size"]
+    num_classes = model_config["num_classes"]
+
+    # Distribute global state and train each selected client
+    for idx in selected_clients:
+        # Build a fresh, clean model template for this client
+        client_model = build_mlp_classifier(
+            input_size, hidden_size, num_classes
+        )
+
+        # Load the centralized global weights into the client model
+        client_model = load_model_state(client_model, global_state)
+
+        # Extract this specific client's data partition
+        client_features, client_labels = client_partitions[idx]
+
+        # Record the sample count (n_k) for weighting this client's contribution later
+        num_samples = client_features.shape[0]
+        round_client_counts.append(num_samples)
+
+        # Generate a distinct, reproducible seed for this client's local training session
+        client_seed = seed + idx
+
+        # Train locally and capture the updated weights state dict
+        updated_state = train_client_local(
+            model=client_model,
+            client_features=client_features,
+            client_labels=client_labels,
+            local_epochs=local_epochs,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            seed=client_seed,
+        )
+
+        round_client_states.append(updated_state)
+
+    # Perform Federated Averaging aggregation across all participating clients
+    new_global_state = aggregate_weighted_average(
+        round_client_states, round_client_counts
+    )
+
+    return new_global_state
 
 # Step 19 - evaluate_accuracy (not yet solved)
 # TODO: implement
