@@ -9,14 +9,18 @@ import numpy as np
 # Step 1 - build_mlp_classifier
 import torch
 import torch.nn as nn
+from collections import OrderedDict
 
 
 def build_mlp_classifier(input_size, hidden_size, num_classes):
-    # TODO: return an nn.Module mapping (N, input_size) floats to (N, num_classes) logits
     mlp = nn.Sequential(
-        nn.Linear(input_size, hidden_size),
-        nn.ReLU(),  
-        nn.Linear(hidden_size, num_classes),
+        OrderedDict(
+            [
+                ("fc1", nn.Linear(input_size, hidden_size)),
+                ("relu", nn.ReLU()),
+                ("fc2", nn.Linear(hidden_size, num_classes)),
+            ]
+        )
     )
     return mlp
 
@@ -320,8 +324,14 @@ def load_model_state(model, state_dict):
     model.load_state_dict(state_dict, strict=True)
     return model
 
-# Step 13 - initialize_global_state (not yet solved)
-# TODO: implement
+# Step 13 - initialize_global_state
+def initialize_global_state(input_size, hidden_size, num_classes, seed):
+    # TODO: seed torch, build a fresh MLP, and return its cloned starting state dict
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    mlp = build_mlp_classifier(input_size, hidden_size, num_classes)
+    return clone_model_state(mlp)
 
 # Step 14 - add_state_dicts (not yet solved)
 # TODO: implement
