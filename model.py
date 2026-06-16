@@ -327,8 +327,9 @@ def load_model_state(model, state_dict):
 # Step 13 - initialize_global_state
 def initialize_global_state(input_size, hidden_size, num_classes, seed):
     # TODO: seed torch, build a fresh MLP, and return its cloned starting state dict
-    generator = torch.Generator()
-    generator.manual_seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
     mlp = build_mlp_classifier(input_size, hidden_size, num_classes)
     return clone_model_state(mlp)
