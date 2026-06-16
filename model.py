@@ -7,13 +7,18 @@ Assembled from your step-by-step solutions.
 import numpy as np
 
 # Step 1 - build_mlp_classifier
+from collections import OrderedDict
 import torch
 import torch.nn as nn
-from collections import OrderedDict
 
 
 def build_mlp_classifier(input_size, hidden_size, num_classes):
-    mlp = nn.Sequential(
+    # Define the class locally inside the function scope
+    class _MLPClassifier(nn.Sequential):
+        pass
+
+    # Instantiate the local class with your named layers
+    mlp = _MLPClassifier(
         OrderedDict(
             [
                 ("fc1", nn.Linear(input_size, hidden_size)),
@@ -22,6 +27,7 @@ def build_mlp_classifier(input_size, hidden_size, num_classes):
             ]
         )
     )
+
     return mlp
 
 # Step 2 - build_synthetic_dataset
@@ -493,8 +499,72 @@ def evaluate_accuracy(model, test_features, test_labels):
 
     return accuracy
 
-# Step 20 - run_fedavg (not yet solved)
-# TODO: implement
+# Step 20 - run_fedavg
+import torch
+
+
+def run_fedavg(
+    client_partitions,
+    test_features,
+    test_labels,
+    model_config,
+    num_rounds,
+    client_fraction,
+    local_epochs,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: init global state, then loop rounds: select clients, run round, evaluate.
+
+    num_clients = len(client_partitions)
+    input_size = model_config["input_size"]
+    hidden_size = model_config["hidden_size"]
+    num_classes = model_config["num_classes"]
+
+    # 1. Initialize the global state dictionary with seeded weights
+    global_state = initialize_global_state(
+        input_size, hidden_size, num_classes, seed
+    )
+
+    accuracies = []
+
+    # 2. Run the federated learning loop across communication rounds
+    for r in range(num_rounds):
+        # Vary the round seed systematically to maintain reproducibility
+        round_seed = seed + (r * 1000)
+
+        # Select the active subset of clients for this round
+        selected_clients = select_round_clients(
+            num_clients=num_clients,
+            client_fraction=client_fraction,
+            seed=round_seed,
+        )
+
+        # Run the communication round (local training + weighted aggregation)
+        global_state = run_communication_round(
+            global_state=global_state,
+            client_partitions=client_partitions,
+            selected_clients=selected_clients,
+            model_config=model_config,
+            local_epochs=local_epochs,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            seed=round_seed,
+        )
+
+        # Evaluate the newly aggregated global model's performance
+        eval_model = build_mlp_classifier(input_size, hidden_size, num_classes)
+        eval_model = load_model_state(eval_model, global_state)
+
+        round_acc = evaluate_accuracy(eval_model, test_features, test_labels)
+        accuracies.append(round_acc)
+
+    # 3. Compile the final model and return alongside accuracy history
+    final_model = build_mlp_classifier(input_size, hidden_size, num_classes)
+    final_model = load_model_state(final_model, global_state)
+
+    return final_model, accuracies
 
 # Step 21 - train_centralized_baseline (not yet solved)
 # TODO: implement
