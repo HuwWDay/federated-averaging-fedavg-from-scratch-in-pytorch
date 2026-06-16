@@ -383,8 +383,27 @@ def aggregate_weighted_average(client_states, client_sample_counts):
 
     return out
 
-# Step 17 - select_round_clients (not yet solved)
-# TODO: implement
+# Step 17 - select_round_clients
+import torch
+
+
+def select_round_clients(num_clients, client_fraction, seed):
+    # TODO: pick max(1, round(client_fraction*num_clients)) distinct client indices
+
+    number = max(1, round(client_fraction * num_clients))
+
+    # Safety ceiling check
+    if number > num_clients:
+        number = num_clients
+
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    shuffled_indices = torch.randperm(num_clients, generator=generator)
+
+    selected_clients = sorted(shuffled_indices[:number].tolist())
+
+    return selected_clients
 
 # Step 18 - run_communication_round (not yet solved)
 # TODO: implement
