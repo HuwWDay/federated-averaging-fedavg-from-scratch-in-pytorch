@@ -244,8 +244,21 @@ def compute_batch_loss(model, batch_features, batch_labels):
     # Compute cross-entropy loss
     return F.cross_entropy(logits, batch_labels)
 
-# Step 9 - local_sgd_step (not yet solved)
-# TODO: implement
+# Step 9 - local_sgd_step
+import torch
+
+
+def local_sgd_step(model, optimizer, batch_features, batch_labels):
+    # TODO: perform one SGD update (forward, loss, backward, step) and return the float loss
+
+    optimizer.zero_grad()
+    loss_tensor = compute_batch_loss(model, batch_features, batch_labels)
+    loss_float = loss_tensor.item()
+
+    loss_tensor.backward()
+    optimizer.step()
+
+    return loss_float
 
 # Step 10 - train_client_local (not yet solved)
 # TODO: implement
