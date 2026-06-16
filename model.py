@@ -342,8 +342,13 @@ def add_state_dicts(state_a, state_b):
         out[k] = state_a[k]+state_b[k]
     return out
 
-# Step 15 - scale_state_dict (not yet solved)
-# TODO: implement
+# Step 15 - scale_state_dict
+def scale_state_dict(state_dict, weight):
+    # TODO: return a new state dict with each tensor multiplied by weight
+    out = {}
+    for k in state_dict:
+        out[k] = weight*state_dict[k]
+    return out
 
 # Step 16 - aggregate_weighted_average (not yet solved)
 # TODO: implement
