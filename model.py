@@ -608,8 +608,45 @@ def train_centralized_baseline(
 
     return test_accuracy
 
-# Step 22 - run_fedavg_iid (not yet solved)
-# TODO: implement
+# Step 22 - run_fedavg_iid
+import torch
+
+
+def run_fedavg_iid(
+    train_features,
+    train_labels,
+    test_features,
+    test_labels,
+    model_config,
+    num_clients,
+    num_rounds,
+    client_fraction,
+    local_epochs,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: partition the data IID across clients, then run FedAvg and return the accuracy curve
+
+    # 1. Distribute the training rows evenly and randomly across the clients (IID profile)
+    client_partitions = partition_data_iid(
+        train_features, train_labels, num_clients, seed
+    )
+
+    model, accuracies = run_fedavg(
+        client_partitions=client_partitions,
+        test_features=test_features,
+        test_labels=test_labels,
+        model_config=model_config,
+        num_rounds=num_rounds,
+        client_fraction=client_fraction,
+        local_epochs=local_epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        seed=seed,
+    )
+
+    return accuracies
 
 # Step 23 - run_fedavg_non_iid (not yet solved)
 # TODO: implement
