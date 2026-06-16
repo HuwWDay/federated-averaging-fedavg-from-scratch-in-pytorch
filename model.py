@@ -343,15 +343,34 @@ def add_state_dicts(state_a, state_b):
     return out
 
 # Step 15 - scale_state_dict
-def scale_state_dict(state_dict, weight):
-    # TODO: return a new state dict with each tensor multiplied by weight
-    out = {}
-    for k in state_dict:
-        out[k] = weight*state_dict[k]
-    return out
+def scale_state_dict(state_dict, factor):
+    """Multiplies every element in a state dict by a scalar factor."""
+    scaled = {}
+    for name, value in state_dict.items():
+        scaled[name] = value * factor
+    return scaled
 
-# Step 16 - aggregate_weighted_average (not yet solved)
-# TODO: implement
+# Step 16 - aggregate_weighted_average
+def aggregate_weighted_average(client_states, client_sample_counts):
+    # TODO: combine client state dicts into a sample-weighted FedAvg average
+    total_data = sum(client_sample_counts)
+
+    # Handle edge cases where there are no clients or no data samples
+    if len(client_states) == 0 or total_data == 0:
+        return {}
+
+    out = {}
+    for c in range(len(client_states)):
+        # Calculate the client fraction weight (n_k / N)
+        client_weight = client_sample_counts[c] / total_data
+
+        # Scale the client's parameters by its weight
+        scaled_client_state = scale_state_dict(client_states[c], client_weight)
+
+        # Accumulate the scaled state into the global output dictionary
+        out = add_state_dicts(out, scaled_client_state)
+
+    return out
 
 # Step 17 - select_round_clients (not yet solved)
 # TODO: implement
