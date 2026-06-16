@@ -648,8 +648,50 @@ def run_fedavg_iid(
 
     return accuracies
 
-# Step 23 - run_fedavg_non_iid (not yet solved)
-# TODO: implement
+# Step 23 - run_fedavg_non_iid
+import torch
+
+
+def run_fedavg_non_iid(
+    train_features,
+    train_labels,
+    test_features,
+    test_labels,
+    model_config,
+    num_clients,
+    shards_per_client,
+    num_rounds,
+    client_fraction,
+    local_epochs,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: partition data non-IID across clients, then run the full FedAvg loop
+
+    # Distribute the training data using the label-skewed, shard-based partitioner
+    client_partitions = partition_data_non_iid(
+        train_features=train_features,
+        train_labels=train_labels,
+        num_clients=num_clients,
+        shards_per_client=shards_per_client,
+        seed=seed,
+    )
+
+    final_model, accuracies = run_fedavg(
+        client_partitions=client_partitions,
+        test_features=test_features,
+        test_labels=test_labels,
+        model_config=model_config,
+        num_rounds=num_rounds,
+        client_fraction=client_fraction,
+        local_epochs=local_epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        seed=seed,
+    )
+
+    return final_model, accuracies
 
 # Step 24 - compute_non_iid_gap (not yet solved)
 # TODO: implement
