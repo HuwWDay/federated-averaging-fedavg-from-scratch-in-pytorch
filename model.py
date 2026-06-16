@@ -628,7 +628,7 @@ def run_fedavg_iid(
 ):
     # TODO: partition the data IID across clients, then run FedAvg and return the accuracy curve
 
-    # 1. Distribute the training rows evenly and randomly across the clients (IID profile)
+    # Distribute the training rows evenly and randomly across the clients (IID profile)
     client_partitions = partition_data_iid(
         train_features, train_labels, num_clients, seed
     )
