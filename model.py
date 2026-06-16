@@ -119,8 +119,67 @@ def partition_data_iid(train_features, train_labels, num_clients, seed):
 
     return client_data
 
-# Step 5 - partition_data_non_iid (not yet solved)
-# TODO: implement
+# Step 5 - partition_data_non_iid
+import torch
+
+
+def partition_data_non_iid(
+    train_features, train_labels, num_clients, shards_per_client, seed
+):
+    # TODO: Sort the data by label and assign label-contiguous shards to each client.
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    # Handle the zero client edge case 
+    if num_clients == 0:
+        
+        shuffled_indices = torch.randperm(
+            train_features.shape[0], generator=generator
+        )
+        return [
+            (train_features[shuffled_indices], train_labels[shuffled_indices])
+        ]
+
+    num_samples = train_features.shape[0]
+    total_shards = num_clients * shards_per_client
+    shard_size = num_samples // total_shards
+
+    # Sort the entire dataset by label to group similar classes together
+    sorted_indices = torch.argsort(train_labels)
+    sorted_features = train_features[sorted_indices]
+    sorted_labels = train_labels[sorted_indices]
+
+    # Use the seeded generator to shuffle the shard ordering deterministically
+    shard_order = torch.randperm(total_shards, generator=generator)
+
+    client_data = []
+
+    # Assign shards to each client sequentially based on the shuffled order
+    for client_idx in range(num_clients):
+        client_feats_list = []
+        client_labs_list = []
+
+        # Gather the specific shards assigned to this client
+        for s in range(shards_per_client):
+            shard_idx = shard_order[client_idx * shards_per_client + s]
+
+            start_sample = shard_idx * shard_size
+            # The last shard absorbs any leftover rounding remainder samples
+            if shard_idx == total_shards - 1:
+                end_sample = num_samples
+            else:
+                end_sample = start_sample + shard_size
+
+            client_feats_list.append(sorted_features[start_sample:end_sample])
+            client_labs_list.append(sorted_labels[start_sample:end_sample])
+
+        # Concatenate this client's shards back into unified tensors
+        client_features = torch.cat(client_feats_list, dim=0)
+        client_labels = torch.cat(client_labs_list, dim=0)
+
+        client_data.append((client_features, client_labels))
+
+    return client_data
 
 # Step 6 - count_client_samples (not yet solved)
 # TODO: implement
