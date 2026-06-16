@@ -296,8 +296,23 @@ def train_client_local(
     # Return a copy of the model's state dictionary containing the trained weights
     return model.state_dict()
 
-# Step 11 - clone_model_state (not yet solved)
-# TODO: implement
+# Step 11 - clone_model_state
+import copy
+import torch
+
+
+def clone_model_state(model):
+    # TODO: Copy a model's parameters into a state dict of detached, cloned tensors.
+
+    live_state = model.state_dict()
+    cloned_state = {}
+
+    for name, tensor in live_state.items():
+        # clone() copies the data to a new memory address
+        # detach() ensures it stops tracking gradients
+        cloned_state[name] = tensor.clone().detach()
+
+    return cloned_state
 
 # Step 12 - load_model_state (not yet solved)
 # TODO: implement
