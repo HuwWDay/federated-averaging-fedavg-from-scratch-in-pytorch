@@ -335,12 +335,23 @@ def initialize_global_state(input_size, hidden_size, num_classes, seed):
     return clone_model_state(mlp)
 
 # Step 14 - add_state_dicts
-def add_state_dicts(state_a, state_b):
-    # TODO: return a new state dict with elementwise sums per matching key
-    out = {}
-    for k in state_a:
-        out[k] = state_a[k]+state_b[k]
-    return out
+def add_state_dicts(dict1, dict2):
+    """Adds the elements of two state dicts together.
+
+    Gracefully bootstraps if the first dictionary is empty.
+    """
+    if not dict1:
+        # If dict1 is empty (first loop iteration), clone/copy dict2 entirely
+        return {
+            name: (v.clone() if hasattr(v, "clone") else v)
+            for name, v in dict2.items()
+        }
+
+    result = {}
+    # Use keys from dict2 since we verified dict1 is initialized and shares the same keys
+    for name in dict2.keys():
+        result[name] = dict1[name] + dict2[name]
+    return result
 
 # Step 15 - scale_state_dict
 def scale_state_dict(state_dict, factor):
