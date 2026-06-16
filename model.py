@@ -334,8 +334,13 @@ def initialize_global_state(input_size, hidden_size, num_classes, seed):
     mlp = build_mlp_classifier(input_size, hidden_size, num_classes)
     return clone_model_state(mlp)
 
-# Step 14 - add_state_dicts (not yet solved)
-# TODO: implement
+# Step 14 - add_state_dicts
+def add_state_dicts(state_a, state_b):
+    # TODO: return a new state dict with elementwise sums per matching key
+    out = {}
+    for k in state_a:
+        out[k] = state_a[k]+state_b[k]
+    return out
 
 # Step 15 - scale_state_dict (not yet solved)
 # TODO: implement
