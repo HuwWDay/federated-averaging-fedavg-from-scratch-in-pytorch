@@ -20,8 +20,25 @@ def build_mlp_classifier(input_size, hidden_size, num_classes):
     )
     return mlp
 
-# Step 2 - build_synthetic_dataset (not yet solved)
-# TODO: implement
+# Step 2 - build_synthetic_dataset
+import torch
+
+
+def build_synthetic_dataset(num_samples, input_size, num_classes, seed):
+    # TODO: build a seeded synthetic dataset of (features, labels) tensors
+
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    features = torch.randn(
+        num_samples, input_size, generator=generator, dtype=torch.float32
+    )
+
+    labels = torch.randint(
+        0, num_classes, (num_samples,), generator=generator, dtype=torch.long
+    )
+
+    return features, labels
 
 # Step 3 - train_test_split_dataset (not yet solved)
 # TODO: implement
