@@ -752,6 +752,47 @@ def rounds_to_target_vs_local_epochs(
 
     return results_dict
 
-# Step 26 - accuracy_vs_client_fraction (not yet solved)
-# TODO: implement
+# Step 26 - accuracy_vs_client_fraction
+import torch
+
+
+def accuracy_vs_client_fraction(
+    client_partitions,
+    test_features,
+    test_labels,
+    model_config,
+    client_fraction_list,
+    num_rounds,
+    local_epochs,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: for each fraction, run FedAvg and record the final test accuracy
+
+    results_dict = {}
+
+    for C in client_fraction_list:
+
+        _, accuracies = run_fedavg(
+            client_partitions=client_partitions,
+            test_features=test_features,
+            test_labels=test_labels,
+            model_config=model_config,
+            num_rounds=num_rounds,
+            client_fraction=C,
+            local_epochs=local_epochs,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            seed=seed,  # Reusing the seed keeps data partitions and round mechanics consistent
+        )
+
+        # Extract the final accuracy achieved after the last communication round
+        # accuracies[-1] grabs the final index safely
+        final_accuracy = accuracies[-1] if accuracies else 0.0
+
+        # Map the client fraction parameter to its final evaluation metric
+        results_dict[C] = final_accuracy
+
+    return results_dict
 
