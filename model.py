@@ -566,8 +566,47 @@ def run_fedavg(
 
     return final_model, accuracies
 
-# Step 21 - train_centralized_baseline (not yet solved)
-# TODO: implement
+# Step 21 - train_centralized_baseline
+import torch
+import torch.optim as optim
+
+def train_centralized_baseline(
+    train_features,
+    train_labels,
+    test_features,
+    test_labels,
+    model_config,
+    num_epochs,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: train the MLP on pooled data with SGD and return test accuracy
+
+    input_size = model_config["input_size"]
+    hidden_size = model_config["hidden_size"]
+    num_classes = model_config["num_classes"]
+
+    model = build_mlp_classifier(input_size, hidden_size, num_classes)
+
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+
+    for epoch in range(num_epochs):
+        # Vary the seed per epoch to get a unique, reproducible batch shuffle
+        epoch_seed = seed + epoch
+
+        # Re-batch the entire pooled dataset for the current epoch
+        batches = iterate_client_batches(
+            train_features, train_labels, batch_size, epoch_seed
+        )
+
+        # Run an optimization step for every mini-batch
+        for batch_features, batch_labels in batches:
+            local_sgd_step(model, optimizer, batch_features, batch_labels)
+
+    test_accuracy = evaluate_accuracy(model, test_features, test_labels)
+
+    return test_accuracy
 
 # Step 22 - run_fedavg_iid (not yet solved)
 # TODO: implement
