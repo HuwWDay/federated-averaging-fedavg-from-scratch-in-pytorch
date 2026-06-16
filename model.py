@@ -703,8 +703,54 @@ def compute_non_iid_gap(iid_accuracies, non_iid_accuracies):
     out["iid_final"], out["non_iid_final"], out["gap"] = iid_final, non_iid, gap
     return out
 
-# Step 25 - rounds_to_target_vs_local_epochs (not yet solved)
-# TODO: implement
+# Step 25 - rounds_to_target_vs_local_epochs
+import torch
+
+
+def rounds_to_target_vs_local_epochs(
+    client_partitions,
+    test_features,
+    test_labels,
+    model_config,
+    local_epochs_list,
+    target_accuracy,
+    num_rounds,
+    client_fraction,
+    batch_size,
+    learning_rate,
+    seed,
+):
+    # TODO: for each E, run FedAvg and find the first round index reaching target_accuracy
+
+    results_dict = {}
+
+    for E in local_epochs_list:
+        # Run a standalone FedAvg simulation for this specific local epoch count
+        _, accuracies = run_fedavg(
+            client_partitions=client_partitions,
+            test_features=test_features,
+            test_labels=test_labels,
+            model_config=model_config,
+            num_rounds=num_rounds,
+            client_fraction=client_fraction,
+            local_epochs=E,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            seed=seed,  
+        )
+
+        first_matching_round = None
+
+        # Scan the accuracy curve sequentially
+        for round_idx, acc in enumerate(accuracies):
+            if acc >= target_accuracy:
+                first_matching_round = round_idx
+                break  # Stop at the earliest round index that qualifies
+
+        # Map the current local epoch setting to its resulting performance boundary
+        results_dict[E] = first_matching_round
+
+    return results_dict
 
 # Step 26 - accuracy_vs_client_fraction (not yet solved)
 # TODO: implement
