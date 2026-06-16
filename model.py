@@ -473,8 +473,36 @@ def run_communication_round(
 
     return new_global_state
 
-# Step 19 - evaluate_accuracy (not yet solved)
-# TODO: implement
+# Step 19 - evaluate_accuracy
+import torch
+
+
+def evaluate_accuracy(model, test_features, test_labels):
+    # TODO: run a no-grad forward pass and return the fraction of correct argmax predictions
+
+    num_samples = test_features.shape[0]
+    # # Return 1.0 accuracy if there are no samples to evaluate
+    # if num_samples == 0:
+    #     return 1.0
+
+    # 1. Set the model to evaluation mode
+    model.eval()
+
+    # 2. Disable gradient tracking for efficient inference
+    with torch.no_grad():
+        # Get raw logits from the forward pass
+        logits = model(test_features)
+
+        # Find the indices of the maximum logit values along the class dimension (dim=1)
+        predictions = torch.argmax(logits, dim=1)
+
+        # Compare predictions to ground truth labels
+        correct_predictions = torch.sum(predictions == test_labels)
+
+        # Calculate accuracy fraction
+        accuracy = correct_predictions.item() / num_samples
+
+    return accuracy
 
 # Step 20 - run_fedavg (not yet solved)
 # TODO: implement
