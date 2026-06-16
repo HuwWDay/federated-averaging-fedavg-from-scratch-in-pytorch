@@ -181,8 +181,14 @@ def partition_data_non_iid(
 
     return client_data
 
-# Step 6 - count_client_samples (not yet solved)
-# TODO: implement
+# Step 6 - count_client_samples
+def count_client_samples(client_partitions):
+    # TODO: return a list of per-client sample counts in the same order
+    # Client partitions looks like a list of (client_features, labels) tensor pairs
+    out = []
+    for client in client_partitions:
+        out.append(client[1].shape[0])
+    return out
 
 # Step 7 - iterate_client_batches (not yet solved)
 # TODO: implement
