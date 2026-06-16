@@ -68,8 +68,56 @@ def train_test_split_dataset(features, labels, test_fraction, seed):
 
     return train_features, train_labels, test_features, test_labels
 
-# Step 4 - partition_data_iid (not yet solved)
-# TODO: implement
+# Step 4 - partition_data_iid
+import torch
+
+
+def partition_data_iid(train_features, train_labels, num_clients, seed):
+    # TODO: Shuffle the M rows with seed and split them evenly across num_clients clients.
+
+    num_samples = train_features.shape[0]
+
+    # Create a local generator for reproducible shuffling
+    generator = torch.Generator()
+    generator.manual_seed(seed)
+
+    # Generate a shuffled sequence of indices covering all M rows
+    shuffled_indices = torch.randperm(num_samples, generator=generator)
+
+    if num_clients == 0:
+        # Return the entire shuffled dataset as a single partition
+        return [
+            (train_features[shuffled_indices], train_labels[shuffled_indices])
+        ]
+    # -------------------------------------------------------
+
+    # Calculate base size and the remainder for clean, uneven distribution
+    base_size = num_samples // num_clients
+    remainder = num_samples % num_clients
+
+    client_data = []
+    current_idx = 0
+
+    for i in range(num_clients):
+        # Dynamically distribute the remainder rows across the first few clients
+        client_size = base_size + (1 if i < remainder else 0)
+
+        # Slice the appropriate block of shuffled indices
+        start_idx = current_idx
+        end_idx = current_idx + client_size
+        indices_for_client = shuffled_indices[start_idx:end_idx]
+
+        # Extract features and labels for this specific client
+        client_feat = train_features[indices_for_client]
+        client_lab = train_labels[indices_for_client]
+
+        # Append as a tuple pair
+        client_data.append((client_feat, client_lab))
+
+        # Advance the pointer for the next client
+        current_idx = end_idx
+
+    return client_data
 
 # Step 5 - partition_data_non_iid (not yet solved)
 # TODO: implement
