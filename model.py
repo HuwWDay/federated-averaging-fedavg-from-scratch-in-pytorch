@@ -229,8 +229,20 @@ def iterate_client_batches(client_features, client_labels, batch_size, seed):
 
     return batches
 
-# Step 8 - compute_batch_loss (not yet solved)
-# TODO: implement
+# Step 8 - compute_batch_loss
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+def compute_batch_loss(model, batch_features, batch_labels):
+    # TODO: Compute the cross-entropy loss for one batch given the model
+
+    # Pass the inputs through the model to get raw logits
+    logits = model(batch_features)
+
+    # Compute cross-entropy loss
+    return F.cross_entropy(logits, batch_labels)
 
 # Step 9 - local_sgd_step (not yet solved)
 # TODO: implement
